@@ -14,27 +14,31 @@ class ByteBankApp extends StatelessWidget {
 }
 
 class ListaTransferencias extends StatelessWidget {
+  final List<Transferencia> _transferencias = [];
   @override
   Widget build(BuildContext context) {
+    _transferencias.add(Transferencia(100.0, 1000));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transferências'),
       ),
-      body: Column(
-        children: <Widget>[
-          ItemTransferencia(Transferencia(100.0, 1000)),
-          ItemTransferencia(Transferencia(200.0, 1000)),
-          ItemTransferencia(Transferencia(300.0, 1000)),
-        ],
+      body: ListView.builder(
+        itemCount: _transferencias.length,
+        itemBuilder: (context, indice) {
+          final transferencia = _transferencias[indice];
+          return ItemTransferencia(transferencia);
+        },
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          final Future future = Navigator.push(context, MaterialPageRoute(builder: (context) {
+          final Future future =
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
             return FormularioTransferencia();
           }));
           future.then((transferenciaRecebida) {
             debugPrint('$transferenciaRecebida');
+            _transferencias.add(transferenciaRecebida);
           });
         },
       ),
@@ -70,9 +74,15 @@ class FormularioTransferencia extends StatelessWidget {
       ),
       body: Column(
         children: <Widget>[
-          Editor(controlador: _numeroConta, dica: "Número da Conta", rotulo: "000"),
-          Editor(controlador: _valor, dica: "Valor", rotulo:  '0.00', icone: Icons.monetization_on),
-          
+          Editor(
+              controlador: _numeroConta,
+              dica: "Número da Conta",
+              rotulo: "000"),
+          Editor(
+              controlador: _valor,
+              dica: "Valor",
+              rotulo: '0.00',
+              icone: Icons.monetization_on),
           ElevatedButton(
             child: Text('Confirmar'),
             onPressed: () {
@@ -87,8 +97,8 @@ class FormularioTransferencia extends StatelessWidget {
   void _criaTransferencia(BuildContext context) {
     final int? numeroConta = int.tryParse(_numeroConta.text);
     final double? valor = double.tryParse(_valor.text);
-    
-    if(numeroConta != null && valor != null) {
+
+    if (numeroConta != null && valor != null) {
       final transferenciaCriada = Transferencia(valor, numeroConta);
       Navigator.pop(context, transferenciaCriada);
     }
@@ -96,39 +106,38 @@ class FormularioTransferencia extends StatelessWidget {
 }
 
 class Editor extends StatelessWidget {
-  
   final TextEditingController? controlador;
   final String? rotulo;
   final String? dica;
   final IconData? icone;
 
-
   Editor({this.controlador, this.rotulo, this.dica, this.icone});
 
-  @override 
+  @override
   Widget build(BuildContext context) {
-    return
-     Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: controlador,
-              style: TextStyle(fontSize: 24.0),
-              decoration: InputDecoration(
-                icon: icone != null ? Icon(icone) : null,
-                  labelText: rotulo,
-                  hintText: dica),
-              keyboardType: TextInputType.number,
-            ),
-          );
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: TextField(
+        controller: controlador,
+        style: TextStyle(fontSize: 24.0),
+        decoration: InputDecoration(
+            icon: icone != null ? Icon(icone) : null,
+            labelText: rotulo,
+            hintText: dica),
+        keyboardType: TextInputType.number,
+      ),
+    );
   }
 }
+
 class Transferencia {
   final double valor;
   final int numeroConta;
-  
+
   @override
   String toString() {
     return 'Transferencia{valor: $valor, numeroConta: $numeroConta}';
   }
+
   Transferencia(this.valor, this.numeroConta);
 }
